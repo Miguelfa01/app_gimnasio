@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestion de Gimnasio - Gestión de Gimnasio{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts - Roboto -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    {% load static %}
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/reportes.css' %}">
+    
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar superior -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'app_gimnasio:dashboard' %}">
+                <span class="fw-bold">Gestion de Gimnasio</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" id="sidebarToggle">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownReportes" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-chart-bar"></i> Reportes
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownReportes">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'app_gimnasio:reporte_miembros_activos_inactivos' %}">
+                                    <i class="fas fa-users text-success"></i> Miembros activos vs. inactivos
+                                </a>
+                            </li>
+                            <!-- Aquí puedes agregar más reportes en el futuro -->
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge bg-danger rounded-pill">0</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="#">No hay notificaciones</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="d-none d-lg-inline me-2">{{ request.user.username }}</span>
+                            <div class="avatar rounded-circle bg-light text-primary d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                {{ request.user.username|slice:":1"|upper }}
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{% url 'admin:index' %}">Panel de Administración</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'app_gimnasio:logout' %}">Cerrar Sesión</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar izquierdo -->
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <h6 class="sidebar-heading px-3 mt-4 mb-1">Principal</h6>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'app_gimnasio:dashboard' %}">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <h6 class="sidebar-heading px-3 mt-4 mb-1">Gestión</h6>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'miembro' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'app_gimnasio:miembro_list' %}">
+                                <i class="fas fa-users"></i> Miembros
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'membresia' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'app_gimnasio:membresia_list' %}">
+                                <i class="fas fa-id-card"></i> Membresías
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'pago' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'app_gimnasio:pago_list' %}">
+                                <i class="fas fa-money-bill-wave"></i> Pagos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'entrenador' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'app_gimnasio:entrenador_list' %}">
+                                <i class="fas fa-user-tie"></i> Entrenadores
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'asignacion' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'app_gimnasio:asignacion_list' %}">
+                                <i class="fas fa-user-check"></i> Asignaciones
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <h6 class="sidebar-heading px-3 mt-4 mb-1">Clases</h6>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'tipo_clase' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'app_gimnasio:tipo_clase_list' %}">
+                                <i class="fas fa-dumbbell"></i> Tipos de Clases
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'horario_clase' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'app_gimnasio:horario_clase_list' %}">
+                                <i class="fas fa-calendar-alt"></i> Horarios
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <h6 class="sidebar-heading px-3 mt-4 mb-1">Reportes</h6>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'registro_acceso' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'app_gimnasio:registro_acceso_list' %}">
+                                <i class="fas fa-door-open"></i> Registros de Acceso
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <h6 class="sidebar-heading px-3 mt-4 mb-1">Configuración</h6>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'objetivo' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'app_gimnasio:objetivo_list' %}">
+                                <i class="fas fa-bullseye"></i> Objetivos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'metodo_pago' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'app_gimnasio:metodo_pago_list' %}">
+                                <i class="fas fa-credit-card"></i> Métodos de Pago
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'banco' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'app_gimnasio:banco_list' %}">
+                                <i class="fas fa-university"></i> Bancos
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Contenido principal -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="main-content">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-3" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- jQuery, Bootstrap 5 JS y Popper.js -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    
+    <!-- jQuery (requerido por Select2) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    {% load static %}
+    <!-- JavaScript personalizado -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

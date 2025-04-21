@@ -1,0 +1,154 @@
+/* Estilos personalizados para la sección de reportes */
+.navbar .dropdown-menu {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+}
+.dropdown-menu .dropdown-item {
+    transition: background 0.2s, color 0.2s;
+}
+.dropdown-menu .dropdown-item:hover {
+    background-color: #e3f2fd;
+    color: #0d6efd;
+}
+.dropdown-menu .fa-users.text-success {
+    margin-right: 0.5em;
+}
+
+/* Tarjetas dashboard para reportes */
+.dashboard-card {
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.04);
+    border: none;
+    margin-bottom: 1rem;
+    transition: box-shadow 0.2s;
+}
+.dashboard-card.card-primary {
+    border-left: 6px solid #0d6efd;
+}
+.dashboard-card.card-danger {
+    border-left: 6px solid #dc3545;
+}
+.dashboard-card h5 {
+    font-weight: 500;
+    color: #333;
+}
+.dashboard-card h2 {
+    font-size: 2.5rem;
+    margin: 0;
+}
+
+/* Minimalismo para tarjetas y tablas de reportes */
+.minimal-card {
+    background: #fff;
+    border-radius: 0.7rem;
+    box-shadow: 0 1px 6px 0 rgba(34,58,94,0.06);
+    border: 1px solid #e3e8ee;
+    margin-bottom: 1rem;
+}
+.minimal-card.minimal-card-activos {
+    border-left: 6px solid #28a745 !important;
+}
+.minimal-card.minimal-card-inactivos {
+    border-left: 6px solid #dc3545 !important;
+}
+.text-deepblue {
+    color: #223A5E !important;
+}
+.text-steel {
+    color: #355C7D !important;
+}
+.text-cyan {
+    color: #6EC6F1 !important;
+}
+.btn-deepblue {
+    background: #223A5E !important;
+    color: #fff !important;
+    border: none;
+    border-radius: 0.3rem;
+    font-weight: 500;
+    padding: 0.25rem 1.2rem;
+}
+.btn-deepblue:hover {
+    background: #355C7D !important;
+    color: #fff !important;
+}
+.minimal-input {
+    border-radius: 0.3rem;
+    border: 1px solid #e3e8ee;
+    font-size: 0.95rem;
+    background: #f8fafc;
+    color: #223A5E;
+}
+.minimal-table {
+    background: #fff;
+    border-radius: 0.5rem;
+    border: 1px solid #e3e8ee;
+    font-size: 0.97rem;
+}
+.minimal-table th {
+    background: #223A5E !important;
+    color: #6EC6F1 !important;
+    border: none !important;
+    font-weight: 500;
+}
+.minimal-table td {
+    color: #223A5E;
+    border-top: 1px solid #e3e8ee;
+}
+.minimal-table tbody tr:hover {
+    background: #eaf1fa;
+}
+.minimal-header {
+    background: #f3f7fa !important;
+    color: #223A5E !important;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #e3e8ee;
+}
+
+/* Tablas estilizadas */
+.table {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: #fff;
+}
+.table thead th {
+    background: #f3f7fa;
+    color: #0d6efd;
+    border: none;
+    font-weight: 500;
+}
+.table-hover tbody tr:hover {
+    background: #e3f2fd;
+}
+
+/* Card headers para listas */
+.card-header.bg-success, .card-header.bg-danger, .card-header.bg-info {
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* Gráfico Chart.js */
+#miembrosChart {
+    max-width: 100%;
+    margin: 0 auto;
+    display: block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-card {
+        margin-bottom: 1.5rem;
+    }
+    .minimal-card {
+        margin-bottom: 1.5rem;
+    }
+    .minimal-table {
+        font-size: 0.93rem;
+    }
+}

@@ -1,0 +1,197 @@
+{% extends 'app_gimnasio/base.html' %}
+{% load static %}
+
+{% block title %}Pagos{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Gestión de Pagos</h1>
+        <div>
+            <a href="{% url 'app_gimnasio:pago_create' %}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-plus fa-sm text-white-50"></i> Nuevo Pago
+            </a>
+            <a href="{% url 'app_gimnasio:reporte_pagos' %}" class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm ml-2">
+                <i class="fas fa-chart-line fa-sm text-white-50"></i> Reportes
+            </a>
+            <a href="?{{ request.GET.urlencode }}&export=csv" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm ml-2">
+                <i class="fas fa-download fa-sm text-white-50"></i> Exportar CSV
+            </a>
+        </div>
+    </div>
+
+    <!-- Tarjetas de Resumen -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total de Pagos</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_pagos }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Suma Total</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ suma_pagos|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
+            <div class="dropdown no-arrow">
+                <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                    aria-labelledby="dropdownMenuLink">
+                    <div class="dropdown-header">Acciones:</div>
+                    <a class="dropdown-item" href="{% url 'app_gimnasio:pago_list' %}">Limpiar Filtros</a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row">
+                <div class="col-md-3 mb-3">
+                    <label for="miembro">Miembro</label>
+                    <select name="miembro" id="miembro" class="form-control">
+                        <option value="">Todos los miembros</option>
+                        {% for miembro in miembros %}
+                            <option value="{{ miembro.id }}" {% if filtros.miembro_id|stringformat:"s" == miembro.id|stringformat:"s" %}selected{% endif %}>
+                                {{ miembro.apellido }}, {{ miembro.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="metodo">Método de Pago</label>
+                    <select name="metodo" id="metodo" class="form-control">
+                        <option value="">Todos los métodos</option>
+                        {% for metodo in metodos_pago %}
+                            <option value="{{ metodo.id }}" {% if filtros.metodo_id|stringformat:"s" == metodo.id|stringformat:"s" %}selected{% endif %}>
+                                {{ metodo.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="fecha_inicio">Fecha Inicio</label>
+                    <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" value="{{ filtros.fecha_inicio|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="fecha_fin">Fecha Fin</label>
+                    <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" value="{{ filtros.fecha_fin|date:'Y-m-d' }}">
+                </div>
+                <div class="col-12 text-right">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla de Pagos -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Listado de Pagos</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Fecha</th>
+                            <th>Miembro</th>
+                            <th>Membresía</th>
+                            <th>Monto</th>
+                            <th>Método</th>
+                            <th>Banco</th>
+                            <th>Referencia</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pago in pagos %}
+                        <tr>
+                            <td>{{ pago.id }}</td>
+                            <td>{{ pago.fecha_pago|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <a href="{% url 'app_gimnasio:miembro_detail' pago.miembro.id %}">
+                                    {{ pago.miembro.apellido }}, {{ pago.miembro.nombre }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{% url 'app_gimnasio:membresia_detail' pago.membresia.id %}">
+                                    {{ pago.membresia.tipo_membresia.nombre }}
+                                </a>
+                            </td>
+                            <td class="text-right">{{ pago.monto|floatformat:2 }}</td>
+                            <td>{{ pago.metodo_pago.nombre }}</td>
+                            <td>{{ pago.banco.nombre|default:"-" }}</td>
+                            <td>{{ pago.referencia_pago|default:"-" }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'app_gimnasio:pago_detail' pago.id %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'app_gimnasio:pago_update' pago.id %}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'app_gimnasio:generar_recibo' pago.id %}" class="btn btn-sm btn-secondary">
+                                        <i class="fas fa-file-invoice"></i>
+                                    </a>
+                                    <a href="{% url 'app_gimnasio:pago_delete' pago.id %}" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center">No hay pagos registrados que coincidan con los filtros.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        $('#dataTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+            },
+            "order": [[1, "desc"]], // Ordenar por fecha (columna 1) descendente
+            "pageLength": 25
+        });
+    });
+</script>
+{% endblock %}

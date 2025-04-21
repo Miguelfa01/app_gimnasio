@@ -1,0 +1,197 @@
+{% extends 'app_gimnasio/base.html' %}
+{% load static %}
+
+{% block title %}Recibo de Pago{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #recibo-imprimible, #recibo-imprimible * {
+            visibility: visible;
+        }
+        #recibo-imprimible {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .no-print {
+            display: none !important;
+        }
+    }
+    
+    .recibo-border {
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 5px;
+    }
+    
+    .recibo-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .recibo-logo {
+        max-width: 150px;
+        margin-bottom: 10px;
+    }
+    
+    .recibo-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .recibo-subtitle {
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 15px;
+    }
+    
+    .recibo-info {
+        margin-bottom: 20px;
+    }
+    
+    .recibo-info-row {
+        margin-bottom: 8px;
+    }
+    
+    .recibo-table {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    
+    .recibo-table th {
+        background-color: #f8f9fc;
+    }
+    
+    .recibo-footer {
+        margin-top: 30px;
+        text-align: center;
+        font-size: 14px;
+        color: #666;
+    }
+    
+    .recibo-signature {
+        margin-top: 40px;
+        text-align: center;
+    }
+    
+    .signature-line {
+        display: inline-block;
+        width: 200px;
+        border-top: 1px solid #333;
+        margin-top: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 no-print">
+        <h1 class="h3 mb-0 text-gray-800">Recibo de Pago #{{ pago.id }}</h1>
+        <div>
+            <button onclick="window.print();" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-print fa-sm text-white-50"></i> Imprimir Recibo
+            </button>
+            <a href="{% url 'app_gimnasio:pago_detail' pago.id %}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm ml-2">
+                <i class="fas fa-arrow-left fa-sm text-white-50"></i> Volver al Detalle
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <div id="recibo-imprimible">
+                        <div class="recibo-border">
+                            <!-- Encabezado del Recibo -->
+                            <div class="recibo-header">
+                                <img src="{% static 'app_gimnasio/img/logo.png' %}" alt="Logo Gimnasio" class="recibo-logo">
+                                <div class="recibo-title">RECIBO DE PAGO</div>
+                                <div class="recibo-subtitle">GIMNASIO FITNESS CENTER</div>
+                            </div>
+                            
+                            <!-- Información del Recibo -->
+                            <div class="recibo-info">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="recibo-info-row"><strong>Recibo Nº:</strong> {{ pago.id }}</div>
+                                        <div class="recibo-info-row"><strong>Fecha:</strong> {{ pago.fecha_pago|date:"d/m/Y H:i" }}</div>
+                                        <div class="recibo-info-row"><strong>Método de Pago:</strong> {{ pago.metodo_pago.nombre }}</div>
+                                        {% if pago.banco %}
+                                        <div class="recibo-info-row"><strong>Banco:</strong> {{ pago.banco.nombre }}</div>
+                                        {% endif %}
+                                        {% if pago.referencia_pago %}
+                                        <div class="recibo-info-row"><strong>Referencia/Nº Transacción:</strong> {{ pago.referencia_pago }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="recibo-info-row"><strong>Cliente:</strong> {{ pago.miembro.nombre }} {{ pago.miembro.apellido }}</div>
+                                        <div class="recibo-info-row"><strong>Cédula/ID:</strong> {{ pago.miembro.cedula }}</div>
+                                        <div class="recibo-info-row"><strong>Teléfono:</strong> {{ pago.miembro.telefono|default:"No registrado" }}</div>
+                                        <div class="recibo-info-row"><strong>Email:</strong> {{ pago.miembro.email|default:"No registrado" }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Detalle del Pago -->
+                            <table class="table recibo-table">
+                                <thead>
+                                    <tr>
+                                        <th>Descripción</th>
+                                        <th>Período</th>
+                                        <th class="text-right">Monto</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{ pago.membresia.tipo_membresia.nombre }}</td>
+                                        <td>{{ pago.membresia.fecha_inicio|date:"d/m/Y" }} - {{ pago.membresia.fecha_vencimiento|date:"d/m/Y" }}</td>
+                                        <td class="text-right">${{ pago.monto|floatformat:2 }}</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2" class="text-right"><strong>Total Pagado:</strong></td>
+                                        <td class="text-right"><strong>${{ pago.monto|floatformat:2 }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="text-right"><strong>Saldo Pendiente:</strong></td>
+                                        <td class="text-right"><strong>${{ saldo_pendiente|floatformat:2 }}</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            
+                            <!-- Notas -->
+                            {% if pago.notas %}
+                            <div class="recibo-info">
+                                <strong>Notas:</strong>
+                                <p>{{ pago.notas|linebreaks }}</p>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Firma -->
+                            <div class="recibo-signature">
+                                <div class="signature-line"></div>
+                                <div>Firma Autorizada</div>
+                            </div>
+                            
+                            <!-- Pie de página -->
+                            <div class="recibo-footer">
+                                <p>Este recibo es válido como comprobante de pago.</p>
+                                <p>Fecha de impresión: {{ fecha_impresion|date:"d/m/Y H:i" }}</p>
+                                <p>Gimnasio Fitness Center - Dirección: Av. Principal #123 - Tel: (123) 456-7890</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

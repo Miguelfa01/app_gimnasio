@@ -1,0 +1,235 @@
+{% extends 'app_gimnasio/base.html' %}
+
+{% block title %}Dashboard - Gestion de Gimnasio{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'app_gimnasio:miembro_create' %}" class="btn btn-sm btn-primary">
+                <i class="fas fa-user-plus"></i> Nuevo Miembro
+            </a>
+            <a href="{% url 'app_gimnasio:membresia_create' %}" class="btn btn-sm btn-success">
+                <i class="fas fa-id-card"></i> Nueva Membresía
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Tarjetas de métricas -->
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card dashboard-card card-primary">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-8">
+                        <h5 class="card-title">Miembros Activos</h5>
+                        <h2 class="mb-0">{{ miembros_activos }}</h2>
+                    </div>
+                    <div class="col-4 text-end">
+                        <i class="fas fa-users fa-3x text-muted"></i>
+                    </div>
+                </div>
+                <p class="card-text mt-2">
+                    <a href="{% url 'app_gimnasio:miembro_list' %}" class="dashboard-link-btn">
+                        Ver todos <i class="fas fa-arrow-right"></i>
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card dashboard-card card-success">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-8">
+                        <h5 class="card-title">Membresías Activas</h5>
+                        <h2 class="mb-0">{{ membresias_activas }}</h2>
+                    </div>
+                    <div class="col-4 text-end">
+                        <i class="fas fa-id-card fa-3x text-muted"></i>
+                    </div>
+                </div>
+                <p class="card-text mt-2">
+                    <a href="{% url 'app_gimnasio:membresia_list' %}" class="dashboard-link-btn">
+                        Ver todas <i class="fas fa-arrow-right"></i>
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card dashboard-card card-warning">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-8">
+                        <h5 class="card-title">Pagos del Mes</h5>
+                        <h2 class="mb-0">{{ pagos_mes }}</h2>
+                    </div>
+                    <div class="col-4 text-end">
+                        <i class="fas fa-money-bill-wave fa-3x text-muted"></i>
+                    </div>
+                </div>
+                <p class="card-text mt-2">
+                    <a href="{% url 'app_gimnasio:pago_list' %}" class="dashboard-link-btn">
+                        Ver todos <i class="fas fa-arrow-right"></i>
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card dashboard-card card-danger">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-8">
+                        <h5 class="card-title">Vencen Pronto</h5>
+                        <h2 class="mb-0">{{ vencen_pronto }}</h2>
+                    </div>
+                    <div class="col-4 text-end">
+                        <i class="fas fa-exclamation-triangle fa-3x text-muted"></i>
+                    </div>
+                </div>
+                <p class="card-text mt-2">
+                    <a href="{% url 'app_gimnasio:membresia_list' %}?vencen_pronto=true" class="dashboard-link-btn text-danger">
+                        Ver detalles <i class="fas fa-arrow-right"></i>
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Accesos recientes y membresías próximas a vencer -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Accesos Recientes</h5>
+                <a href="{% url 'app_gimnasio:registro_acceso_list' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Miembro</th>
+                                <th>Tipo</th>
+                                <th>Fecha/Hora</th>
+                                <th>Resultado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for acceso in accesos_recientes %}
+                            <tr>
+                                <td>{{ acceso.miembro }}</td>
+                                <td>{{ acceso.tipo_acceso }}</td>
+                                <td>{{ acceso.fecha_hora_intento|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    {% if acceso.resultado_verificacion == 'Permitido' %}
+                                    <span class="badge bg-success">{{ acceso.resultado_verificacion }}</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">{{ acceso.resultado_verificacion }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">No hay registros de acceso recientes</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Membresías Próximas a Vencer</h5>
+                <a href="{% url 'app_gimnasio:membresia_list' %}?vencen_pronto=true" class="btn btn-sm btn-outline-primary">Ver todas</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Miembro</th>
+                                <th>Plan</th>
+                                <th>Vence</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for membresia in membresias_vencen_pronto %}
+                            <tr>
+                                <td>{{ membresia.miembro }}</td>
+                                <td>{{ membresia.tipo_membresia }}</td>
+                                <td>{{ membresia.fecha_vencimiento|date:"d/m/Y" }}</td>
+                                <td>
+                                    <span class="badge bg-warning text-dark">{{ membresia.estado_pago }}</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">No hay membresías próximas a vencer</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Clases del día -->
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Clases de Hoy</h5>
+                <a href="{% url 'app_gimnasio:horario_clase_list' %}" class="btn btn-sm btn-outline-primary">Ver horario completo</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Clase</th>
+                                <th>Entrenador</th>
+                                <th>Horario</th>
+                                <th>Capacidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for clase in clases_hoy %}
+                            <tr>
+                                <td>
+                                    <span class="badge" style="background-color: {{ clase.tipo_clase.color_hex|default:'#429EBD' }}">
+                                        {{ clase.tipo_clase.nombre }}
+                                    </span>
+                                </td>
+                                <td>{{ clase.entrenador|default:"No asignado" }}</td>
+                                <td>{{ clase.hora_inicio|time:"H:i" }} - {{ clase.hora_fin|time:"H:i" }}</td>
+                                <td>{{ clase.capacidad_maxima|default:"Sin límite" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">No hay clases programadas para hoy</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

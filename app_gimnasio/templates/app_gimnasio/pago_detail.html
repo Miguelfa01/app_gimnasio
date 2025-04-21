@@ -1,0 +1,248 @@
+{% extends 'app_gimnasio/base.html' %}
+{% load static %}
+
+{% block title %}Detalle de Pago{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Detalle de Pago #{{ pago.id }}</h1>
+        <div>
+            <a href="{% url 'app_gimnasio:pago_update' pago.id %}" class="d-none d-sm-inline-block btn btn-sm btn-warning shadow-sm">
+                <i class="fas fa-edit fa-sm text-white-50"></i> Editar
+            </a>
+            <a href="{% url 'app_gimnasio:generar_recibo' pago.id %}" class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm ml-2">
+                <i class="fas fa-file-invoice fa-sm text-white-50"></i> Generar Recibo
+            </a>
+            <a href="{% url 'app_gimnasio:pago_delete' pago.id %}" class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm ml-2">
+                <i class="fas fa-trash fa-sm text-white-50"></i> Eliminar
+            </a>
+            <a href="{% url 'app_gimnasio:pago_list' %}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm ml-2">
+                <i class="fas fa-arrow-left fa-sm text-white-50"></i> Volver al Listado
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información del Pago -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Información del Pago</h6>
+                    <div class="dropdown no-arrow">
+                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                            aria-labelledby="dropdownMenuLink">
+                            <div class="dropdown-header">Acciones:</div>
+                            <a class="dropdown-item" href="{% url 'app_gimnasio:pago_update' pago.id %}">Editar Pago</a>
+                            <a class="dropdown-item" href="{% url 'app_gimnasio:generar_recibo' pago.id %}">Generar Recibo</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" href="{% url 'app_gimnasio:pago_delete' pago.id %}">Eliminar Pago</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h5 class="text-gray-800">Información General</h5>
+                                <hr>
+                                <p><strong>ID:</strong> {{ pago.id }}</p>
+                                <p><strong>Fecha y Hora:</strong> {{ pago.fecha_pago|date:"d/m/Y H:i" }}</p>
+                                <p><strong>Monto:</strong> ${{ pago.monto|floatformat:2 }}</p>
+                                <p><strong>Método de Pago:</strong> {{ pago.metodo_pago.nombre }}</p>
+                                {% if pago.banco %}
+                                <p><strong>Banco:</strong> {{ pago.banco.nombre }}</p>
+                                {% endif %}
+                                {% if pago.referencia_pago %}
+                                <p><strong>Referencia/Nº Transacción:</strong> {{ pago.referencia_pago }}</p>
+                                {% endif %}
+                                <p><strong>Registrado por:</strong> {{ pago.registrado_por.get_full_name|default:pago.registrado_por.username }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h5 class="text-gray-800">Información del Miembro</h5>
+                                <hr>
+                                <p>
+                                    <strong>Miembro:</strong> 
+                                    <a href="{% url 'app_gimnasio:miembro_detail' pago.miembro.id %}">
+                                        {{ pago.miembro.apellido }}, {{ pago.miembro.nombre }}
+                                    </a>
+                                </p>
+                                <p><strong>Cédula/ID:</strong> {{ pago.miembro.cedula }}</p>
+                                <p><strong>Teléfono:</strong> {{ pago.miembro.telefono|default:"No registrado" }}</p>
+                                <p><strong>Email:</strong> {{ pago.miembro.email|default:"No registrado" }}</p>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5 class="text-gray-800">Información de la Membresía</h5>
+                                <hr>
+                                <p>
+                                    <strong>Tipo de Membresía:</strong> 
+                                    <a href="{% url 'app_gimnasio:membresia_detail' pago.membresia.id %}">
+                                        {{ pago.membresia.tipo_membresia.nombre }}
+                                    </a>
+                                </p>
+                                <p><strong>Fecha Inicio:</strong> {{ pago.membresia.fecha_inicio|date:"d/m/Y" }}</p>
+                                <p><strong>Fecha Vencimiento:</strong> {{ pago.membresia.fecha_vencimiento|date:"d/m/Y" }}</p>
+                                <p>
+                                    <strong>Estado:</strong> 
+                                    {% if pago.membresia.fecha_vencimiento < now.date %}
+                                    <span class="badge badge-danger">Vencida</span>
+                                    {% else %}
+                                    <span class="badge badge-success">Activa</span>
+                                    {% endif %}
+                                </p>
+                                <p>
+                                    <strong>Estado de Pago:</strong>
+                                    {% if pago.membresia.estado_pago == 'Pagado' %}
+                                    <span class="badge badge-success">Pagado</span>
+                                    {% elif pago.membresia.estado_pago == 'Parcial' %}
+                                    <span class="badge badge-warning">Pago Parcial</span>
+                                    {% else %}
+                                    <span class="badge badge-danger">Pendiente</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if pago.notas %}
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <h5 class="text-gray-800">Notas</h5>
+                                <hr>
+                                <p>{{ pago.notas|linebreaks }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Resumen de Pagos de la Membresía -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Resumen de Pagos</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="text-center">
+                            <h4 class="small font-weight-bold">Progreso de Pago <span class="float-right">
+                                {% if total_pagado >= pago.membresia.precio_pagado %}
+                                    100%
+                                {% else %}
+                                    {{ total_pagado|floatformat:0 }}%
+                                {% endif %}
+                            </span></h4>
+                            <div class="progress mb-4">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {% if total_pagado >= pago.membresia.precio_pagado %}100{% else %}{{ total_pagado|floatformat:0 }}{% endif %}%"
+                                    aria-valuenow="{% if total_pagado >= pago.membresia.precio_pagado %}100{% else %}{{ total_pagado|floatformat:0 }}{% endif %}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p><strong>Precio Total:</strong> ${{ pago.membresia.precio_pagado|floatformat:2 }}</p>
+                        <p><strong>Total Pagado:</strong> ${{ total_pagado|floatformat:2 }}</p>
+                        <p><strong>Saldo Pendiente:</strong> ${{ saldo_pendiente|floatformat:2 }}</p>
+                    </div>
+                    
+                    {% if saldo_pendiente > 0 %}
+                    <div class="text-center">
+                        <a href="{% url 'app_gimnasio:pago_create' %}?membresia_id={{ pago.membresia.id }}" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus fa-sm"></i> Registrar Otro Pago
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Historial de Pagos -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Historial de Pagos</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Monto</th>
+                                    <th>Método</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in pagos_membresia %}
+                                <tr {% if p.id == pago.id %}class="table-active"{% endif %}>
+                                    <td>{{ p.fecha_pago|date:"d/m/Y" }}</td>
+                                    <td>${{ p.monto|floatformat:2 }}</td>
+                                    <td>{{ p.metodo_pago.nombre }}</td>
+                                    <td>
+                                        {% if p.id != pago.id %}
+                                        <a href="{% url 'app_gimnasio:pago_detail' p.id %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No hay pagos registrados</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Otros Pagos del Miembro -->
+            {% if otros_pagos %}
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Otros Pagos del Miembro</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Membresía</th>
+                                    <th>Monto</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in otros_pagos %}
+                                <tr>
+                                    <td>{{ p.fecha_pago|date:"d/m/Y" }}</td>
+                                    <td>{{ p.membresia.tipo_membresia.nombre }}</td>
+                                    <td>${{ p.monto|floatformat:2 }}</td>
+                                    <td>
+                                        <a href="{% url 'app_gimnasio:pago_detail' p.id %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

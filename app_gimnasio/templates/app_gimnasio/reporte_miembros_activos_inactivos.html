@@ -1,0 +1,174 @@
+{% extends 'app_gimnasio/base.html' %}
+{% block title %}Reporte: Miembros Activos vs. Inactivos{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="minimal-card minimal-card-activos text-center py-3 px-2 mb-2">
+                <div class="fw-bold text-steel mb-1">Miembros Activos</div>
+                <div class="display-6 text-success">{{ total_activos }}</div>
+                <div class="small text-muted">de {{ total_activos_all }} registrados</div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="minimal-card minimal-card-inactivos text-center py-3 px-2 mb-2">
+                <div class="fw-bold text-steel mb-1">Miembros Inactivos</div>
+                <div class="display-6 text-danger">{{ total_inactivos }}</div>
+                <div class="small text-muted">de {{ total_inactivos_all }} registrados</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4">
+            <form class="mb-2" method="get" autocomplete="off">
+                <div class="d-flex align-items-center gap-2">
+                    <input type="text" class="form-control form-control-sm minimal-input" name="busqueda_activos" placeholder="Buscar nombre o cédula..." value="{{ busqueda_activos }}">
+                    <input type="hidden" name="page_inactivos" value="{{ page_inactivos.number }}">
+                    <button class="btn btn-sm btn-deepblue" type="submit">Buscar</button>
+                </div>
+            </form>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-steel">Mostrando {{ page_activos.start_index }}-{{ page_activos.end_index }} de {{ page_activos.paginator.count }} activos</small>
+                <div>
+                    {% if page_activos.has_previous %}
+                        <a href="?page_activos={{ page_activos.previous_page_number }}&busqueda_activos={{ busqueda_activos }}&page_inactivos={{ page_inactivos.number }}&busqueda_inactivos={{ busqueda_inactivos }}" class="btn btn-link btn-sm text-deepblue">Anterior</a>
+                    {% endif %}
+                    <span class="mx-1 text-deepblue">{{ page_activos.number }}</span>
+                    {% if page_activos.has_next %}
+                        <a href="?page_activos={{ page_activos.next_page_number }}&busqueda_activos={{ busqueda_activos }}&page_inactivos={{ page_inactivos.number }}&busqueda_inactivos={{ busqueda_inactivos }}" class="btn btn-link btn-sm text-deepblue">Siguiente</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="d-flex justify-content-end mb-2 gap-2">
+                <a href="{% url 'app_gimnasio:exportar_miembros_excel' %}?tipo=activos&busqueda={{ busqueda_activos }}" class="btn btn-outline-success btn-sm" title="Exportar a Excel"><i class="fas fa-file-excel"></i></a>
+                <a href="{% url 'app_gimnasio:exportar_miembros_pdf' %}?tipo=activos&busqueda={{ busqueda_activos }}" class="btn btn-outline-danger btn-sm" title="Exportar a PDF"><i class="fas fa-file-pdf"></i></a>
+            </div>
+            <div class="table-responsive">
+                <table class="table minimal-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Cédula</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for miembro in page_activos %}
+                        <tr>
+                            <td>{{ miembro.nombre }} {{ miembro.apellido }}</td>
+                            <td>{{ miembro.cedula }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="2" class="text-muted text-center">No hay miembros activos.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <form class="mb-2" method="get" autocomplete="off">
+                <div class="d-flex align-items-center gap-2">
+                    <input type="text" class="form-control form-control-sm minimal-input" name="busqueda_inactivos" placeholder="Buscar nombre o cédula..." value="{{ busqueda_inactivos }}">
+                    <input type="hidden" name="page_activos" value="{{ page_activos.number }}">
+                    <button class="btn btn-sm btn-deepblue" type="submit">Buscar</button>
+                </div>
+            </form>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-steel">Mostrando {{ page_inactivos.start_index }}-{{ page_inactivos.end_index }} de {{ page_inactivos.paginator.count }} inactivos</small>
+                <div>
+                    {% if page_inactivos.has_previous %}
+                        <a href="?page_inactivos={{ page_inactivos.previous_page_number }}&busqueda_inactivos={{ busqueda_inactivos }}&page_activos={{ page_activos.number }}&busqueda_activos={{ busqueda_activos }}" class="btn btn-link btn-sm text-deepblue">Anterior</a>
+                    {% endif %}
+                    <span class="mx-1 text-deepblue">{{ page_inactivos.number }}</span>
+                    {% if page_inactivos.has_next %}
+                        <a href="?page_inactivos={{ page_inactivos.next_page_number }}&busqueda_inactivos={{ busqueda_inactivos }}&page_activos={{ page_activos.number }}&busqueda_activos={{ busqueda_activos }}" class="btn btn-link btn-sm text-deepblue">Siguiente</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="d-flex justify-content-end mb-2 gap-2">
+                <a href="{% url 'app_gimnasio:exportar_miembros_excel' %}?tipo=inactivos&busqueda={{ busqueda_inactivos }}" class="btn btn-outline-success btn-sm" title="Exportar a Excel"><i class="fas fa-file-excel"></i></a>
+                <a href="{% url 'app_gimnasio:exportar_miembros_pdf' %}?tipo=inactivos&busqueda={{ busqueda_inactivos }}" class="btn btn-outline-danger btn-sm" title="Exportar a PDF"><i class="fas fa-file-pdf"></i></a>
+            </div>
+            <div class="table-responsive">
+                <table class="table minimal-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Cédula</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for miembro in page_inactivos %}
+                        <tr>
+                            <td>{{ miembro.nombre }} {{ miembro.apellido }}</td>
+                            <td>{{ miembro.cedula }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="2" class="text-muted text-center">No hay miembros inactivos.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm minimal-card">
+                <div class="card-header minimal-header text-deepblue">
+                    <i class="fas fa-chart-pie"></i> Proporción Activos/Inactivos
+                </div>
+                <div class="card-body">
+                    <canvas id="miembrosChart" width="500" height="360" style="max-width:100%;display:block;margin:0 auto;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var ctx = document.getElementById('miembrosChart').getContext('2d');
+        var miembrosChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Activos', 'Inactivos'],
+                datasets: [{
+                    data: [{{ total_activos }}, {{ total_inactivos }}],
+                    backgroundColor: ['#28a745', '#dc3545'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            color: '#223A5E',
+                            font: { size: 14 }
+                        }
+                    },
+                    datalabels: {
+                        color: '#223A5E',
+                        font: { weight: 'bold', size: 14 },
+                        formatter: function(value, context) {
+                            var total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            var pct = total > 0 ? (value / total * 100).toFixed(1) + '%' : '0%';
+                            return pct;
+                        }
+                    }
+                },
+                cutout: '60%',
+                responsive: true,
+                maintainAspectRatio: false
+            },
+            plugins: [ChartDataLabels]
+        });
+    });
+</script>
+{% endblock %}

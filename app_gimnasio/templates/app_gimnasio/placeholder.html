@@ -1,0 +1,23 @@
+{% extends 'app_gimnasio/base.html' %}
+
+{% block title %}Funcionalidad en Desarrollo - Acuaryum{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Funcionalidad en Desarrollo</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="javascript:history.back()" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-info" role="alert">
+    <h4 class="alert-heading"><i class="fas fa-tools"></i> ¡Estamos trabajando en ello!</h4>
+    <p>{{ mensaje }}</p>
+    <hr>
+    <p class="mb-0">Esta funcionalidad estará disponible próximamente. Gracias por su paciencia.</p>
+</div>
+{% endblock %}

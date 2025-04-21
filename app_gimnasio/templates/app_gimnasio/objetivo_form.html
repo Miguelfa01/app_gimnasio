@@ -1,0 +1,19 @@
+{% extends 'app_gimnasio/base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="mb-3">{{ title }}</h2>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="d-flex justify-content-between mt-3">
+                    <a href="{% url 'app_gimnasio:objetivo_list' %}" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

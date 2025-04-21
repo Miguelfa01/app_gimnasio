@@ -1,0 +1,176 @@
+{% extends 'app_gimnasio/base.html' %}
+{% load static %}
+
+{% block title %}Eliminar Membresía - Acuaryum{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-container {
+        background-color: white;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .delete-warning {
+        background-color: #f8d7da;
+        color: #842029;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        border-left: 5px solid #dc3545;
+    }
+    
+    .delete-warning i {
+        font-size: 2rem;
+        margin-right: 1rem;
+    }
+    
+    .member-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .member-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: var(--azul-acero);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.5rem;
+        margin-right: 1rem;
+    }
+    
+    .member-details {
+        flex-grow: 1;
+    }
+    
+    .member-name {
+        font-weight: 600;
+        color: var(--azul-profundo);
+        margin-bottom: 0.25rem;
+    }
+    
+    .member-id {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .membership-info {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .membership-type {
+        font-weight: 600;
+        color: var(--azul-profundo);
+        margin-bottom: 0.5rem;
+    }
+    
+    .membership-dates {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .membership-price {
+        font-weight: 500;
+        color: var(--azul-acero);
+        margin-top: 0.5rem;
+    }
+    
+    .btn-cancel {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+    
+    .btn-cancel:hover {
+        background-color: #5c636a;
+        border-color: #5c636a;
+    }
+    
+    .btn-confirm-delete {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+    
+    .btn-confirm-delete:hover {
+        background-color: #bb2d3b;
+        border-color: #bb2d3b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Eliminar Membresía</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'app_gimnasio:membresia_list' %}" class="btn btn-sm btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver al Listado
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="delete-container">
+            <div class="delete-warning d-flex align-items-center">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <h4 class="mb-1">¡Atención! Esta acción no se puede deshacer</h4>
+                    <p class="mb-0">Está a punto de eliminar permanentemente esta membresía y todos sus datos asociados, incluyendo pagos y registros de acceso vinculados a ella.</p>
+                </div>
+            </div>
+            
+            <div class="member-info">
+                {% if membresia.miembro.foto %}
+                <img src="{{ membresia.miembro.foto.url }}" alt="{{ membresia.miembro.nombre }}" class="member-avatar">
+                {% else %}
+                <div class="member-avatar">
+                    {{ membresia.miembro.nombre|slice:":1" }}{{ membresia.miembro.apellido|slice:":1" }}
+                </div>
+                {% endif %}
+                <div class="member-details">
+                    <div class="member-name">{{ membresia.miembro.nombre }} {{ membresia.miembro.apellido }}</div>
+                    <div class="member-id">ID: {{ membresia.miembro.id }} | Cédula: {{ membresia.miembro.cedula }}</div>
+                </div>
+            </div>
+            
+            <div class="membership-info">
+                <div class="membership-type">{{ membresia.tipo_membresia.nombre }}</div>
+                <div class="membership-dates">
+                    <div>Inicio: {{ membresia.fecha_inicio|date:"d/m/Y" }}</div>
+                    <div>Vencimiento: {{ membresia.fecha_vencimiento|date:"d/m/Y" }}</div>
+                </div>
+                <div class="membership-price">Precio: {{ membresia.precio }}</div>
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="d-flex justify-content-end mt-4">
+                    <a href="{% url 'app_gimnasio:membresia_detail' membresia.id %}" class="btn btn-cancel text-white me-2">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-confirm-delete text-white">
+                        <i class="fas fa-trash-alt"></i> Confirmar Eliminación
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

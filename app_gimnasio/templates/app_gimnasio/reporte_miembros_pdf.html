@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Miembros {{ tipo }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 13px; }
+        h2 { color: #223A5E; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+        th, td { border: 1px solid #223A5E; padding: 6px 8px; text-align: left; }
+        th { background: #223A5E; color: #6EC6F1; }
+        tr:nth-child(even) { background: #f6fafd; }
+    </style>
+</head>
+<body>
+    <h2>Miembros {{ tipo }}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Cédula</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in miembros %}
+            <tr>
+                <td>{{ m.nombre }}</td>
+                <td>{{ m.apellido }}</td>
+                <td>{{ m.cedula }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3">No hay miembros para mostrar.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

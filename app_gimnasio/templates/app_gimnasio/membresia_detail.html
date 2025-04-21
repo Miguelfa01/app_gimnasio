@@ -1,0 +1,462 @@
+{% extends 'app_gimnasio/base.html' %}
+{% load static %}
+
+{% block title %}Detalle de Membresía - Acuaryum{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-container {
+        background-color: white;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .section-title {
+        color: var(--azul-profundo);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--cian-suave);
+    }
+    
+    .info-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .info-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .info-label {
+        font-weight: 500;
+        color: var(--azul-acero);
+    }
+    
+    .info-value {
+        color: #333;
+    }
+    
+    .member-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .member-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: var(--azul-acero);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.5rem;
+        margin-right: 1rem;
+    }
+    
+    .member-details {
+        flex-grow: 1;
+    }
+    
+    .member-name {
+        font-weight: 600;
+        color: var(--azul-profundo);
+        margin-bottom: 0.25rem;
+    }
+    
+    .member-id {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .membership-status {
+        font-size: 0.9rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+    
+    .status-active {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+    
+    .status-inactive {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+    
+    .status-expiring {
+        background-color: #fff3cd;
+        color: #664d03;
+    }
+    
+    .membership-type {
+        font-weight: 600;
+        color: var(--azul-profundo);
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .membership-dates {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+    
+    .date-box {
+        flex: 1;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        text-align: center;
+        margin-right: 0.5rem;
+    }
+    
+    .date-box:last-child {
+        margin-right: 0;
+    }
+    
+    .date-box .date-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 0.25rem;
+    }
+    
+    .date-box .date-value {
+        font-weight: 600;
+        color: var(--azul-profundo);
+    }
+    
+    .date-box.expiring .date-value {
+        color: var(--naranja-profundo);
+    }
+    
+    .price-box {
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .price-box .price-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 0.25rem;
+    }
+    
+    .price-box .price-value {
+        font-weight: 600;
+        color: var(--azul-profundo);
+        font-size: 1.5rem;
+    }
+    
+    .btn-action {
+        margin-right: 0.5rem;
+    }
+    
+    .btn-edit {
+        background-color: var(--naranja-calido);
+        border-color: var(--naranja-calido);
+    }
+    
+    .btn-edit:hover {
+        background-color: var(--naranja-profundo);
+        border-color: var(--naranja-profundo);
+    }
+    
+    .btn-delete {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+    
+    .btn-delete:hover {
+        background-color: #bb2d3b;
+        border-color: #bb2d3b;
+    }
+    
+    .btn-back {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+    
+    .btn-back:hover {
+        background-color: #5c636a;
+        border-color: #5c636a;
+    }
+    
+    .btn-renew {
+        background-color: var(--azul-acero);
+        border-color: var(--azul-acero);
+    }
+    
+    .btn-renew:hover {
+        background-color: var(--azul-profundo);
+        border-color: var(--azul-profundo);
+    }
+    
+    .payment-card {
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .payment-card .payment-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    
+    .payment-card .payment-date {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .payment-card .payment-amount {
+        font-weight: 600;
+        color: var(--azul-profundo);
+    }
+    
+    .payment-card .payment-method {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .payment-card .payment-reference {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .days-remaining {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+    }
+    
+    .days-remaining.expiring {
+        color: var(--naranja-profundo);
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Detalle de Membresía</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'app_gimnasio:membresia_list' %}" class="btn btn-sm btn-back text-white">
+                <i class="fas fa-arrow-left"></i> Volver al Listado
+            </a>
+            <a href="{% url 'app_gimnasio:membresia_update' membresia.id %}" class="btn btn-sm btn-edit text-white">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            {% if membresia.vencida or membresia.por_vencer %}
+            <a href="{% url 'app_gimnasio:membresia_renovar' membresia.id %}" class="btn btn-sm btn-renew text-white">
+                <i class="fas fa-sync-alt"></i> Renovar
+            </a>
+            {% endif %}
+            <a href="{% url 'app_gimnasio:membresia_delete' membresia.id %}" class="btn btn-sm btn-delete text-white">
+                <i class="fas fa-trash-alt"></i> Eliminar
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="detail-container">
+            <!-- Información del Miembro -->
+            <div class="info-section">
+                <h3 class="section-title">Información del Miembro</h3>
+                <div class="member-info">
+                    {% if membresia.miembro.foto %}
+                    <img src="{{ membresia.miembro.foto.url }}" alt="{{ membresia.miembro.nombre }}" class="member-avatar">
+                    {% else %}
+                    <div class="member-avatar">
+                        {{ membresia.miembro.nombre|slice:":1" }}{{ membresia.miembro.apellido|slice:":1" }}
+                    </div>
+                    {% endif %}
+                    <div class="member-details">
+                        <div class="member-name">{{ membresia.miembro.nombre }} {{ membresia.miembro.apellido }}</div>
+                        <div class="member-id">ID: {{ membresia.miembro.id }} | Cédula: {{ membresia.miembro.cedula }}</div>
+                        <a href="{% url 'app_gimnasio:miembro_detail' membresia.miembro.id %}" class="btn btn-sm btn-outline-primary mt-2">
+                            <i class="fas fa-user"></i> Ver Perfil Completo
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Información de la Membresía -->
+            <div class="info-section">
+                <h3 class="section-title">Información de la Membresía</h3>
+                
+                <div class="membership-type">
+                    {{ membresia.tipo_membresia.nombre }}
+                    {% if membresia.activa and not membresia.vencida %}
+                    <span class="membership-status status-active">
+                        <i class="fas fa-check-circle"></i> Activa
+                    </span>
+                    {% elif membresia.vencida %}
+                    <span class="membership-status status-inactive">
+                        <i class="fas fa-times-circle"></i> Vencida
+                    </span>
+                    {% else %}
+                    <span class="membership-status status-inactive">
+                        <i class="fas fa-times-circle"></i> Inactiva
+                    </span>
+                    {% endif %}
+                    
+                    {% if membresia.por_vencer and not membresia.vencida %}
+                    <span class="membership-status status-expiring">
+                        <i class="fas fa-exclamation-circle"></i> Por vencer
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <div class="membership-dates">
+                            <div class="date-box">
+                                <div class="date-label">Fecha de Inicio</div>
+                                <div class="date-value">{{ membresia.fecha_inicio|date:"d/m/Y" }}</div>
+                            </div>
+                            <div class="date-box {% if membresia.por_vencer %}expiring{% endif %}">
+                                <div class="date-label">Fecha de Vencimiento</div>
+                                <div class="date-value">{{ membresia.fecha_vencimiento|date:"d/m/Y" }}</div>
+                                {% if not membresia.vencida %}
+                                <div class="days-remaining {% if membresia.por_vencer %}expiring{% endif %}">
+                                    {% if dias_restantes > 0 %}
+                                    Faltan {{ dias_restantes }} días
+                                    {% elif dias_restantes == 0 %}
+                                    Vence hoy
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="price-box">
+                            <div class="price-label">Precio</div>
+                            <div class="price-value">{{ membresia.precio }}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="info-label">Notas</div>
+                        <div class="info-value">
+                            {% if membresia.notas %}
+                            {{ membresia.notas }}
+                            {% else %}
+                            No hay notas adicionales
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pagos Asociados -->
+            <div class="info-section">
+                <h3 class="section-title">Pagos Asociados</h3>
+                
+                {% if pagos %}
+                <div class="row">
+                    {% for pago in pagos %}
+                    <div class="col-md-6 mb-3">
+                        <div class="payment-card">
+                            <div class="payment-header">
+                                <div class="payment-date">{{ pago.fecha|date:"d/m/Y" }}</div>
+                                <div class="payment-amount">{{ pago.monto }}</div>
+                            </div>
+                            <div class="payment-method">
+                                <i class="fas fa-money-bill-wave me-1"></i> {{ pago.metodo_pago.nombre }}
+                                {% if pago.banco %}
+                                ({{ pago.banco.nombre }})
+                                {% endif %}
+                            </div>
+                            {% if pago.referencia %}
+                            <div class="payment-reference">
+                                <i class="fas fa-hashtag me-1"></i> Ref: {{ pago.referencia }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    No hay pagos registrados para esta membresía.
+                </div>
+                {% endif %}
+                
+                <div class="d-flex justify-content-end mt-3">
+                    <a href="#" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-plus-circle"></i> Registrar Nuevo Pago
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Accesos Registrados -->
+            <div class="info-section">
+                <h3 class="section-title">Últimos Accesos</h3>
+                
+                {% if accesos %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Fecha y Hora</th>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for acceso in accesos %}
+                            <tr>
+                                <td>{{ acceso.fecha_hora_intento|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    {% if acceso.tipo_acceso == 'entrada' %}
+                                    <span class="badge bg-success">Entrada</span>
+                                    {% else %}
+                                    <span class="badge bg-primary">Salida</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if acceso.acceso_permitido %}
+                                    <span class="badge bg-success">Permitido</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Denegado</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    No hay registros de acceso para este miembro durante esta membresía.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

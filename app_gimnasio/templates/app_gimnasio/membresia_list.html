@@ -1,0 +1,359 @@
+{% extends 'app_gimnasio/base.html' %}
+{% load static %}
+
+{% block title %}Membresías - Acuaryum{% endblock %}
+
+{% block extra_css %}
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap5.min.css">
+<style>
+    .table-container {
+        background-color: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .member-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: var(--azul-acero);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    
+    .member-info {
+        display: flex;
+        align-items: center;
+    }
+    
+    .member-info .member-details {
+        margin-left: 10px;
+    }
+    
+    .member-name {
+        font-weight: 600;
+        color: var(--azul-profundo);
+        margin-bottom: 0;
+    }
+    
+    .member-id {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .action-buttons .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .dataTables_info {
+        margin-top: 1rem;
+        color: var(--azul-profundo);
+        font-weight: 500;
+    }
+    
+    .page-item.active .page-link {
+        background-color: var(--azul-acero);
+        border-color: var(--azul-acero);
+    }
+    
+    .page-link {
+        color: var(--azul-acero);
+    }
+    
+    .page-link:hover {
+        color: var(--azul-profundo);
+    }
+    
+    .dataTables_filter input {
+        border-color: var(--azul-acero);
+        border-radius: 4px;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .dataTables_filter input:focus {
+        border-color: var(--azul-acero);
+        box-shadow: 0 0 0 0.25rem rgba(66, 158, 189, 0.25);
+    }
+    
+    .badge-active {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        font-weight: 500;
+    }
+    
+    .badge-inactive {
+        background-color: #f8d7da;
+        color: #842029;
+        font-weight: 500;
+    }
+    
+    .badge-expiring {
+        background-color: #fff3cd;
+        color: #664d03;
+        font-weight: 500;
+    }
+    
+    .price-tag {
+        font-weight: 600;
+        color: var(--azul-profundo);
+    }
+    
+    .membership-type {
+        font-weight: 500;
+        color: var(--azul-acero);
+    }
+    
+    .expiry-date {
+        font-size: 0.9rem;
+    }
+    
+    .expiry-date.expiring {
+        color: var(--naranja-profundo);
+        font-weight: 500;
+    }
+    
+    .stats-card {
+        background-color: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+        border-left: 4px solid var(--azul-acero);
+    }
+    
+    .stats-card .stats-title {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-card .stats-value {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--azul-profundo);
+        margin-bottom: 0;
+    }
+    
+    .stats-card .stats-icon {
+        font-size: 2rem;
+        color: var(--azul-acero);
+        opacity: 0.8;
+    }
+    
+    .stats-card.active-card {
+        border-left-color: #198754;
+    }
+    
+    .stats-card.active-card .stats-icon {
+        color: #198754;
+    }
+    
+    .stats-card.expiring-card {
+        border-left-color: var(--naranja-calido);
+    }
+    
+    .stats-card.expiring-card .stats-icon {
+        color: var(--naranja-calido);
+    }
+    
+    .stats-card.inactive-card {
+        border-left-color: #dc3545;
+    }
+    
+    .stats-card.inactive-card .stats-icon {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Membresías</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'app_gimnasio:membresia_create' %}" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus-circle"></i> Nueva Membresía
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stats-card active-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stats-title">Membresías Activas</div>
+                    <div class="stats-value">{{ activas_count }}</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card expiring-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stats-title">Por Vencer (30 días)</div>
+                    <div class="stats-value">{{ por_vencer_count }}</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card inactive-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stats-title">Membresías Vencidas</div>
+                    <div class="stats-value">{{ vencidas_count }}</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stats-title">Total Membresías</div>
+                    <div class="stats-value">{{ total_membresias }}</div>
+                </div>
+                <div class="stats-icon">
+                    <i class="fas fa-id-card"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="table-container">
+            <div class="table-responsive">
+                <table id="membresias-table" class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Miembro</th>
+                            <th>Tipo</th>
+                            <th>Fechas</th>
+                            <th>Precio</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for membresia in membresias %}
+                        <tr>
+                            <td>
+                                <div class="member-info">
+                                    {% if membresia.miembro.foto %}
+                                    <img src="{{ membresia.miembro.foto.url }}" alt="{{ membresia.miembro.nombre }}" class="member-avatar">
+                                    {% else %}
+                                    <div class="member-avatar">{{ membresia.miembro.nombre|slice:":1" }}{{ membresia.miembro.apellido|slice:":1" }}</div>
+                                    {% endif %}
+                                    <div class="member-details">
+                                        <div class="member-name">{{ membresia.miembro.nombre }} {{ membresia.miembro.apellido }}</div>
+                                        <div class="member-id">ID: {{ membresia.miembro.id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="membership-type">{{ membresia.tipo_membresia.nombre }}</div>
+                                <small class="text-muted">{{ membresia.tipo_membresia.duracion_dias }} días</small>
+                            </td>
+                            <td>
+                                <div><small>Inicio:</small> {{ membresia.fecha_inicio|date:"d/m/Y" }}</div>
+                                <div class="expiry-date {% if membresia.por_vencer %}expiring{% endif %}">
+                                    <small>Vence:</small> {{ membresia.fecha_vencimiento|date:"d/m/Y" }}
+                                    {% if membresia.por_vencer %}
+                                    <i class="fas fa-exclamation-circle" title="Por vencer"></i>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="price-tag">{{ membresia.precio }}</div>
+                            </td>
+                            <td>
+                                {% if membresia.activa and not membresia.vencida %}
+                                <span class="badge badge-active">Activa</span>
+                                {% elif membresia.vencida %}
+                                <span class="badge badge-inactive">Vencida</span>
+                                {% else %}
+                                <span class="badge badge-inactive">Inactiva</span>
+                                {% endif %}
+                                
+                                {% if membresia.por_vencer and not membresia.vencida %}
+                                <span class="badge badge-expiring">Por vencer</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{% url 'app_gimnasio:membresia_detail' membresia.id %}" class="btn btn-sm btn-info text-white" title="Ver detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'app_gimnasio:membresia_update' membresia.id %}" class="btn btn-sm btn-warning text-white" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'app_gimnasio:membresia_delete' membresia.id %}" class="btn btn-sm btn-danger btn-delete" title="Eliminar">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No hay membresías registradas</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.9/js/responsive.bootstrap5.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#membresias-table').DataTable({
+            responsive: true,
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json'
+            },
+            columnDefs: [
+                { responsivePriority: 1, targets: 0 },
+                { responsivePriority: 2, targets: 5 },
+                { responsivePriority: 3, targets: 4 },
+                { responsivePriority: 4, targets: 1 }
+            ],
+            dom: '<"d-flex justify-content-between align-items-center mb-3"lf>rt<"d-flex justify-content-between align-items-center mt-3"ip>',
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+            pageLength: 10,
+            order: [[2, 'desc']]
+        });
+    });
+</script>
+{% endblock %}

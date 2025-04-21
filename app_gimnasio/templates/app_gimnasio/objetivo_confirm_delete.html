@@ -1,0 +1,21 @@
+{% extends 'app_gimnasio/base.html' %}
+{% block title %}Eliminar Objetivo{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="alert alert-danger mt-4">
+                <h4 class="alert-heading">¿Estás seguro que deseas eliminar este objetivo?</h4>
+                <p><strong>{{ objetivo.nombre }}</strong></p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between mt-3">
+                        <a href="{% url 'app_gimnasio:objetivo_list' %}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

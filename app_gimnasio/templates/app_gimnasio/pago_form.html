@@ -1,0 +1,427 @@
+{% extends 'app_gimnasio/base.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Editar Pago{% else %}Nuevo Pago{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            {% if form.instance.pk %}
+                Editar Pago #{{ form.instance.pk }}
+            {% else %}
+                Registrar Nuevo Pago
+            {% endif %}
+        </h1>
+        <a href="{% url 'app_gimnasio:pago_list' %}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Volver al Listado
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Formulario de Pago -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        {% if form.instance.pk %}
+                            Información del Pago
+                        {% else %}
+                            Datos del Pago
+                        {% endif %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="pagoForm">
+                        {% csrf_token %}
+                        
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <strong>Error:</strong> Por favor corrige los errores indicados a continuación.
+                        </div>
+                        {% endif %}
+                        
+                        <div class="row">
+                            <!-- Miembro -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.miembro.id_for_label }}">{{ form.miembro.label }}</label>
+                                {{ form.miembro }}
+                                {% if form.miembro.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.miembro.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Membresía -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.membresia.id_for_label }}">{{ form.membresia.label }}</label>
+                                {{ form.membresia }}
+                                {% if form.membresia.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.membresia.errors }}
+                                </div>
+                                {% endif %}
+                                <small id="membresiaHelp" class="form-text text-muted d-none">
+                                    Selecciona primero un miembro para ver sus membresías.
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <!-- Monto -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.monto.id_for_label }}">{{ form.monto.label }}</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">$</span>
+                                    </div>
+                                    {{ form.monto }}
+                                </div>
+                                {% if form.monto.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.monto.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Método de Pago -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.metodo_pago.id_for_label }}">{{ form.metodo_pago.label }}</label>
+                                {{ form.metodo_pago }}
+                                {% if form.metodo_pago.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.metodo_pago.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <!-- Banco -->
+                            <div class="col-md-6 mb-3" id="bancoContainer">
+                                <label for="{{ form.banco.id_for_label }}">{{ form.banco.label }}</label>
+                                {{ form.banco }}
+                                {% if form.banco.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.banco.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Referencia de Pago -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.referencia_pago.id_for_label }}">{{ form.referencia_pago.label }}</label>
+                                {{ form.referencia_pago }}
+                                {% if form.referencia_pago.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.referencia_pago.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Notas -->
+                        <div class="mb-3">
+                            <label for="{{ form.notas.id_for_label }}">{{ form.notas.label }}</label>
+                            {{ form.notas }}
+                            {% if form.notas.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.notas.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-primary">
+                                {% if form.instance.pk %}
+                                    Actualizar Pago
+                                {% else %}
+                                    Registrar Pago
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Información de la Membresía -->
+            <div class="card shadow mb-4 d-none" id="membresiaInfo">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Información de la Membresía</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <strong>Tipo:</strong> <span id="tipoMembresiaNombre"></span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Precio Total:</strong> $<span id="precioTotal"></span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Pagado Hasta Ahora:</strong> $<span id="pagadoHastaAhora"></span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Saldo Pendiente:</strong> $<span id="saldoPendiente"></span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Estado de Pago:</strong> <span id="estadoPago" class="badge"></span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Fecha Inicio:</strong> <span id="fechaInicio"></span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Fecha Vencimiento:</strong> <span id="fechaVencimiento"></span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Estado:</strong> <span id="estadoMembresia" class="badge"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Historial de Pagos -->
+            <div class="card shadow mb-4 d-none" id="historialPagos">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Historial de Pagos</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Monto</th>
+                                    <th>Método</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historialPagosBody">
+                                <!-- Se llenará dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        const miembroSelect = $('#{{ form.miembro.id_for_label }}');
+        const membresiaSelect = $('#{{ form.membresia.id_for_label }}');
+        const montoInput = $('#{{ form.monto.id_for_label }}');
+        const metodoPagoSelect = $('#{{ form.metodo_pago.id_for_label }}');
+        const bancoContainer = $('#bancoContainer');
+        const membresiaHelp = $('#membresiaHelp');
+        
+        const membresiaInfo = $('#membresiaInfo');
+        const tipoMembresiaNombre = $('#tipoMembresiaNombre');
+        const precioTotal = $('#precioTotal');
+        const pagadoHastaAhora = $('#pagadoHastaAhora');
+        const saldoPendiente = $('#saldoPendiente');
+        const estadoPago = $('#estadoPago');
+        const fechaInicio = $('#fechaInicio');
+        const fechaVencimiento = $('#fechaVencimiento');
+        const estadoMembresia = $('#estadoMembresia');
+        
+        const historialPagos = $('#historialPagos');
+        const historialPagosBody = $('#historialPagosBody');
+        
+        // Función para cargar las membresías de un miembro
+        function cargarMembresias(miembroId) {
+            if (!miembroId) {
+                membresiaSelect.empty().append('<option value="">---------</option>');
+                membresiaSelect.prop('disabled', true);
+                membresiaHelp.removeClass('d-none');
+                return;
+            }
+            
+            membresiaSelect.prop('disabled', true);
+            membresiaSelect.empty().append('<option value="">Cargando...</option>');
+            
+            $.ajax({
+                url: `/app_gimnasio/api/miembro/${miembroId}/membresias/`,
+                method: 'GET',
+                success: function(data) {
+                    membresiaSelect.empty().append('<option value="">Seleccione una membresía</option>');
+                    
+                    if (data.length === 0) {
+                        membresiaSelect.append('<option value="" disabled>No hay membresías disponibles</option>');
+                    } else {
+                        data.forEach(function(membresia) {
+                            const option = $('<option></option>')
+                                .val(membresia.id)
+                                .text(`${membresia.tipo_membresia.nombre} (${membresia.fecha_inicio} - ${membresia.fecha_vencimiento})`);
+                            
+                            membresiaSelect.append(option);
+                        });
+                    }
+                    
+                    membresiaSelect.prop('disabled', false);
+                    membresiaHelp.addClass('d-none');
+                    
+                    // Si hay un valor preseleccionado, seleccionarlo
+                    {% if form.membresia.value %}
+                    membresiaSelect.val('{{ form.membresia.value }}');
+                    cargarInfoMembresia('{{ form.membresia.value }}');
+                    {% endif %}
+                },
+                error: function() {
+                    membresiaSelect.empty().append('<option value="">Error al cargar membresías</option>');
+                    membresiaSelect.prop('disabled', true);
+                }
+            });
+        }
+        
+        // Función para cargar información de una membresía
+        function cargarInfoMembresia(membresiaId) {
+            if (!membresiaId) {
+                membresiaInfo.addClass('d-none');
+                historialPagos.addClass('d-none');
+                return;
+            }
+            
+            $.ajax({
+                url: `/app_gimnasio/api/membresia/${membresiaId}/`,
+                method: 'GET',
+                success: function(data) {
+                    // Llenar información de la membresía
+                    tipoMembresiaNombre.text(data.tipo_membresia.nombre);
+                    precioTotal.text(data.precio_pagado);
+                    pagadoHastaAhora.text(data.total_pagado || '0.00');
+                    
+                    const saldo = (parseFloat(data.precio_pagado) - parseFloat(data.total_pagado || 0)).toFixed(2);
+                    saldoPendiente.text(saldo);
+                    
+                    // Sugerir el saldo pendiente como monto a pagar
+                    if (parseFloat(saldo) > 0) {
+                        montoInput.val(saldo);
+                    }
+                    
+                    // Mostrar estado de pago con color
+                    estadoPago.text(data.estado_pago);
+                    if (data.estado_pago === 'Pagado') {
+                        estadoPago.removeClass('badge-warning badge-danger').addClass('badge-success');
+                    } else if (data.estado_pago === 'Parcial') {
+                        estadoPago.removeClass('badge-success badge-danger').addClass('badge-warning');
+                    } else {
+                        estadoPago.removeClass('badge-success badge-warning').addClass('badge-danger');
+                    }
+                    
+                    // Mostrar fechas
+                    fechaInicio.text(data.fecha_inicio);
+                    fechaVencimiento.text(data.fecha_vencimiento);
+                    
+                    // Mostrar estado con color
+                    const hoy = new Date();
+                    const fechaVenc = new Date(data.fecha_vencimiento);
+                    
+                    if (fechaVenc < hoy) {
+                        estadoMembresia.text('Vencida');
+                        estadoMembresia.removeClass('badge-success badge-warning').addClass('badge-danger');
+                    } else {
+                        estadoMembresia.text('Activa');
+                        estadoMembresia.removeClass('badge-danger badge-warning').addClass('badge-success');
+                    }
+                    
+                    membresiaInfo.removeClass('d-none');
+                    
+                    // Cargar historial de pagos
+                    cargarHistorialPagos(membresiaId);
+                },
+                error: function() {
+                    membresiaInfo.addClass('d-none');
+                    historialPagos.addClass('d-none');
+                }
+            });
+        }
+        
+        // Función para cargar historial de pagos
+        function cargarHistorialPagos(membresiaId) {
+            $.ajax({
+                url: `/app_gimnasio/api/membresia/${membresiaId}/pagos/`,
+                method: 'GET',
+                success: function(data) {
+                    historialPagosBody.empty();
+                    
+                    if (data.length === 0) {
+                        historialPagosBody.append('<tr><td colspan="3" class="text-center">No hay pagos registrados</td></tr>');
+                    } else {
+                        data.forEach(function(pago) {
+                            const row = $('<tr></tr>');
+                            row.append(`<td>${pago.fecha_pago}</td>`);
+                            row.append(`<td>$${pago.monto}</td>`);
+                            row.append(`<td>${pago.metodo_pago.nombre}</td>`);
+                            historialPagosBody.append(row);
+                        });
+                    }
+                    
+                    historialPagos.removeClass('d-none');
+                },
+                error: function() {
+                    historialPagos.addClass('d-none');
+                }
+            });
+        }
+        
+        // Función para mostrar/ocultar campo de banco según método de pago
+        function actualizarCampoBanco() {
+            const metodoPagoId = metodoPagoSelect.val();
+            
+            if (!metodoPagoId) {
+                bancoContainer.show();
+                return;
+            }
+            
+            $.ajax({
+                url: `/app_gimnasio/api/metodo_pago/${metodoPagoId}/`,
+                method: 'GET',
+                success: function(data) {
+                    if (data.requiere_banco) {
+                        bancoContainer.show();
+                    } else {
+                        bancoContainer.hide();
+                    }
+                },
+                error: function() {
+                    bancoContainer.show();
+                }
+            });
+        }
+        
+        // Eventos
+        miembroSelect.on('change', function() {
+            const miembroId = $(this).val();
+            cargarMembresias(miembroId);
+            membresiaInfo.addClass('d-none');
+            historialPagos.addClass('d-none');
+        });
+        
+        membresiaSelect.on('change', function() {
+            const membresiaId = $(this).val();
+            cargarInfoMembresia(membresiaId);
+        });
+        
+        metodoPagoSelect.on('change', actualizarCampoBanco);
+        
+        // Inicialización
+        {% if form.instance.pk %}
+            // Si es edición, cargar la información de la membresía
+            cargarInfoMembresia('{{ form.instance.membresia.id }}');
+        {% elif form.miembro.value %}
+            // Si hay un miembro preseleccionado, cargar sus membresías
+            cargarMembresias('{{ form.miembro.value }}');
+        {% else %}
+            // Deshabilitar el select de membresías hasta que se seleccione un miembro
+            membresiaSelect.prop('disabled', true);
+            membresiaHelp.removeClass('d-none');
+        {% endif %}
+        
+        // Inicializar campo de banco
+        actualizarCampoBanco();
+    });
+</script>
+{% endblock %}

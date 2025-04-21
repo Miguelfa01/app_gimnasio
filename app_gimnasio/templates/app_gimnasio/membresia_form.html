@@ -1,0 +1,463 @@
+{% extends 'app_gimnasio/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}{% if form.instance.id %}Editar{% else %}Nueva{% endif %} Membresía - Gestion de Gimnasio{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        background-color: white;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .form-section-title {
+        color: var(--azul-profundo);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--cian-suave);
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: var(--azul-acero);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--azul-acero);
+        box-shadow: 0 0 0 0.25rem rgba(66, 158, 189, 0.25);
+    }
+    
+    .required-field::after {
+        content: " *";
+        color: var(--naranja-profundo);
+    }
+    
+    .btn-primary {
+        background-color: var(--azul-acero);
+        border-color: var(--azul-acero);
+    }
+    
+    .btn-primary:hover, .btn-primary:focus {
+        background-color: var(--azul-profundo);
+        border-color: var(--azul-profundo);
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+    
+    .member-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .member-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: var(--azul-acero);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.5rem;
+        margin-right: 1rem;
+    }
+    
+    .member-details {
+        flex-grow: 1;
+    }
+    
+    .member-name {
+        font-weight: 600;
+        color: var(--azul-profundo);
+        margin-bottom: 0.25rem;
+    }
+    
+    .member-id {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .payment-section {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+    
+    .payment-section.disabled {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--azul-acero);
+        border-color: var(--azul-acero);
+    }
+    
+    .membership-type-info {
+        background-color: #e9ecef;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+    }
+    
+    .membership-type-info p {
+        margin-bottom: 0.5rem;
+    }
+    
+    .membership-type-info .price {
+        font-weight: 600;
+        color: var(--azul-profundo);
+    }
+    
+    .membership-type-info .duration {
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{% if form.instance.id %}Editar{% else %}Nueva{% endif %} Membresía</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'app_gimnasio:membresia_list' %}" class="btn btn-sm btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver al Listado
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-container">
+            <form method="post" enctype="multipart/form-data" novalidate id="membresia-form">
+                {% csrf_token %}
+                
+                <!-- Información del Miembro -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Información del Miembro</h3>
+                    {% if form.instance.id %}
+                        <!-- Si es edición, mostrar información del miembro -->
+                        <div class="member-info">
+                            {% if form.instance.miembro.foto %}
+                            <img src="{{ form.instance.miembro.foto.url }}" alt="{{ form.instance.miembro.nombre }}" class="member-avatar">
+                            {% else %}
+                            <div class="member-avatar">
+                                {{ form.instance.miembro.nombre|slice:":1" }}{{ form.instance.miembro.apellido|slice:":1" }}
+                            </div>
+                            {% endif %}
+                            <div class="member-details">
+                                <div class="member-name">{{ form.instance.miembro.nombre }} {{ form.instance.miembro.apellido }}</div>
+                                <div class="member-id">ID: {{ form.instance.miembro.id }} | Cédula: {{ form.instance.miembro.cedula }}</div>
+                            </div>
+                        </div>
+                        {{ form.miembro.as_hidden }}
+                    {% else %}
+                        <!-- Si es creación, mostrar selector de miembro -->
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.miembro.id_for_label }}" class="form-label required-field">Miembro</label>
+                                {{ form.miembro|add_class:"form-control"|attr:"id:miembro-select" }}
+                                {% if form.miembro.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.miembro.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Información de la Membresía -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Información de la Membresía</h3>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.tipo_membresia.id_for_label }}" class="form-label required-field">Tipo de Membresía</label>
+                            {{ form.tipo_membresia|add_class:"form-control" }}
+                            {% if form.tipo_membresia.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.tipo_membresia.errors }}
+                                </div>
+                            {% endif %}
+                            <div id="tipo-membresia-info" class="membership-type-info mt-2 d-none">
+                                <p class="price">Precio: <span id="tipo-precio"></span></p>
+                                <p class="duration">Duración: <span id="tipo-duracion"></span> días</p>
+                                <p class="description">Descripción: <span id="tipo-descripcion"></span></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.precio.id_for_label }}" class="form-label required-field">Precio</label>
+                            {{ form.precio|add_class:"form-control" }}
+                            {% if form.precio.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.precio.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.fecha_inicio.id_for_label }}" class="form-label required-field">Fecha de Inicio</label>
+                            {{ form.fecha_inicio|add_class:"form-control" }}
+                            {% if form.fecha_inicio.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.fecha_inicio.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.fecha_vencimiento.id_for_label }}" class="form-label">Fecha de Vencimiento</label>
+                            {{ form.fecha_vencimiento|add_class:"form-control" }}
+                            <small class="text-muted">Si se deja en blanco, se calculará automáticamente según el tipo de membresía.</small>
+                            {% if form.fecha_vencimiento.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.fecha_vencimiento.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.activa|add_class:"form-check-input" }}
+                                <label class="form-check-label" for="{{ form.activa.id_for_label }}">Membresía Activa</label>
+                            </div>
+                            {% if form.activa.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.activa.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Información de Pago Inicial -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Información de Pago Inicial</h3>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <div class="form-check form-switch">
+                                {{ form.registrar_pago|add_class:"form-check-input" }}
+                                <label class="form-check-label" for="{{ form.registrar_pago.id_for_label }}">Registrar Pago Inicial</label>
+                            </div>
+                            {% if form.registrar_pago.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.registrar_pago.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div id="payment-section" class="payment-section">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.monto_pago.id_for_label }}" class="form-label">Monto del Pago</label>
+                                {{ form.monto_pago|add_class:"form-control" }}
+                                {% if form.monto_pago.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.monto_pago.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.metodo_pago.id_for_label }}" class="form-label">Método de Pago</label>
+                                {{ form.metodo_pago|add_class:"form-control" }}
+                                {% if form.metodo_pago.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.metodo_pago.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.banco.id_for_label }}" class="form-label">Banco</label>
+                                {{ form.banco|add_class:"form-control" }}
+                                <small class="text-muted">Solo para transferencias o pagos con tarjeta.</small>
+                                {% if form.banco.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.banco.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.referencia.id_for_label }}" class="form-label">Referencia</label>
+                                {{ form.referencia|add_class:"form-control" }}
+                                <small class="text-muted">Número de referencia o comprobante.</small>
+                                {% if form.referencia.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.referencia.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Notas Adicionales -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Notas Adicionales</h3>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="{{ form.notas.id_for_label }}" class="form-label">Notas</label>
+                            {{ form.notas|add_class:"form-control" }}
+                            {% if form.notas.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.notas.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-end mt-4">
+                    <a href="{% url 'app_gimnasio:membresia_list' %}" class="btn btn-secondary me-2">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> {% if form.instance.id %}Actualizar{% else %}Guardar{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        $('#miembro-select').select2({
+            width: '100%',
+            placeholder: 'Buscar miembro por nombre o apellido'
+        });
+    });
+    
+    // Mostrar/ocultar sección de pago según el checkbox
+    document.addEventListener('DOMContentLoaded', function() {
+        const registrarPagoCheckbox = document.getElementById('id_registrar_pago');
+        const paymentSection = document.getElementById('payment-section');
+        
+        function togglePaymentSection() {
+            if (registrarPagoCheckbox.checked) {
+                paymentSection.classList.remove('disabled');
+            } else {
+                paymentSection.classList.add('disabled');
+            }
+        }
+        
+        // Inicializar estado
+        togglePaymentSection();
+        
+        // Cambiar estado cuando se modifica el checkbox
+        registrarPagoCheckbox.addEventListener('change', togglePaymentSection);
+        
+        // Manejar cambios en el tipo de membresía
+        const tipoMembresiaSelect = document.getElementById('id_tipo_membresia');
+        const precioInput = document.getElementById('id_precio');
+        const fechaInicioInput = document.getElementById('id_fecha_inicio');
+        const fechaVencimientoInput = document.getElementById('id_fecha_vencimiento');
+        const montoPagoInput = document.getElementById('id_monto_pago');
+        const tipoMembresiaInfo = document.getElementById('tipo-membresia-info');
+        const tipoPrecio = document.getElementById('tipo-precio');
+        const tipoDuracion = document.getElementById('tipo-duracion');
+        const tipoDescripcion = document.getElementById('tipo-descripcion');
+        
+        // Datos de los tipos de membresía
+        const tiposMembresia = {
+            {% for tipo in tipos_membresia %}
+            {{ tipo.id }}: {
+                precio: {{ tipo.precio_estandar|floatformat:"2"|default:"0.00" }},
+                duracion: {{ tipo.duracion_dias|default:"0" }},
+                descripcion: "{{ tipo.descripcion|default:'No hay descripción disponible'|escapejs }}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        };
+        
+        function actualizarInfoTipoMembresia() {
+            const tipoId = tipoMembresiaSelect.value;
+            
+            if (tipoId && tiposMembresia[tipoId]) {
+                const tipo = tiposMembresia[tipoId];
+                
+                // Actualizar precio
+                precioInput.value = tipo.precio;
+                montoPagoInput.value = tipo.precio;
+                
+                // Actualizar fecha de vencimiento si hay fecha de inicio
+                if (fechaInicioInput.value) {
+                    const fechaInicio = new Date(fechaInicioInput.value);
+                    const fechaVencimiento = new Date(fechaInicio);
+                    fechaVencimiento.setDate(fechaVencimiento.getDate() + tipo.duracion_dias);
+                    
+                    // Formatear fecha como YYYY-MM-DD
+                    const year = fechaVencimiento.getFullYear();
+                    const month = String(fechaVencimiento.getMonth() + 1).padStart(2, '0');
+                    const day = String(fechaVencimiento.getDate()).padStart(2, '0');
+                    fechaVencimientoInput.value = `${year}-${month}-${day}`;
+                }
+                
+                // Mostrar información del tipo
+                tipoPrecio.textContent = tipo.precio;
+                tipoDuracion.textContent = tipo.duracion_dias;
+                tipoDescripcion.textContent = tipo.descripcion;
+                tipoMembresiaInfo.classList.remove('d-none');
+            } else {
+                tipoMembresiaInfo.classList.add('d-none');
+            }
+        }
+        
+        // Inicializar si hay un tipo seleccionado
+        if (tipoMembresiaSelect.value) {
+            actualizarInfoTipoMembresia();
+        }
+        
+        // Actualizar cuando cambia el tipo de membresía
+        tipoMembresiaSelect.addEventListener('change', actualizarInfoTipoMembresia);
+        
+        // Actualizar fecha de vencimiento cuando cambia la fecha de inicio
+        fechaInicioInput.addEventListener('change', function() {
+            if (tipoMembresiaSelect.value && tiposMembresia[tipoMembresiaSelect.value]) {
+                const tipo = tiposMembresia[tipoMembresiaSelect.value];
+                
+                if (fechaInicioInput.value) {
+                    const fechaInicio = new Date(fechaInicioInput.value);
+                    const fechaVencimiento = new Date(fechaInicio);
+                    fechaVencimiento.setDate(fechaVencimiento.getDate() + tipo.duracion_dias);
+                    
+                    // Formatear fecha como YYYY-MM-DD
+                    const year = fechaVencimiento.getFullYear();
+                    const month = String(fechaVencimiento.getMonth() + 1).padStart(2, '0');
+                    const day = String(fechaVencimiento.getDate()).padStart(2, '0');
+                    fechaVencimientoInput.value = `${year}-${month}-${day}`;
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
