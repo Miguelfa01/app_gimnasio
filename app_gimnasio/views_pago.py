@@ -104,12 +104,19 @@ def pago_detail(request, pk):
     total_pagado = pagos_membresia.aggregate(total=Sum('monto'))['total'] or 0
     saldo_pendiente = pago.membresia.precio_pagado - total_pagado
     
+    # Cálculo correcto del porcentaje de progreso
+    if pago.membresia.precio_pagado == 0:
+        progreso_pago = 100
+    else:
+        progreso_pago = min(100, (total_pagado / pago.membresia.precio_pagado) * 100)
+    
     context = {
         'pago': pago,
         'otros_pagos': otros_pagos,
         'pagos_membresia': pagos_membresia,
         'total_pagado': total_pagado,
-        'saldo_pendiente': saldo_pendiente
+        'saldo_pendiente': saldo_pendiente,
+        'progreso_pago': progreso_pago
     }
     
     return render(request, 'app_gimnasio/pago_detail.html', context)
@@ -258,10 +265,17 @@ def generar_recibo(request, pk):
     total_pagado = pagos_membresia.aggregate(total=Sum('monto'))['total'] or 0
     saldo_pendiente = pago.membresia.precio_pagado - total_pagado
     
+    # Cálculo correcto del porcentaje de progreso
+    if pago.membresia.precio_pagado == 0:
+        progreso_pago = 100
+    else:
+        progreso_pago = min(100, (total_pagado / pago.membresia.precio_pagado) * 100)
+    
     context = {
         'pago': pago,
         'total_pagado': total_pagado,
         'saldo_pendiente': saldo_pendiente,
+        'progreso_pago': progreso_pago,
         'fecha_impresion': timezone.now()
     }
     

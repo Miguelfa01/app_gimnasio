@@ -42,13 +42,14 @@
                         {% endif %}
                         
                         <div class="row">
-                            <!-- Miembro -->
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.miembro.id_for_label }}">{{ form.miembro.label }}</label>
-                                {{ form.miembro }}
-                                {% if form.miembro.errors %}
+                            <!-- Miembro con autocompletado -->
+                            <div class="col-md-6 mb-3 position-relative">
+                                <label for="id_miembro_autocomplete">Miembro</label>
+                                <input type="text" name="miembro_autocomplete" id="id_miembro_autocomplete" class="form-control" autocomplete="off" placeholder="Buscar miembro por nombre...">
+                                <div id="miembro-autocomplete-list" class="autocomplete-items position-absolute w-100 bg-white border rounded shadow-sm" style="z-index: 10; display: none;"></div>
+                                {% if form.miembro_autocomplete.errors %}
                                 <div class="invalid-feedback d-block">
-                                    {{ form.miembro.errors }}
+                                    {{ form.miembro_autocomplete.errors }}
                                 </div>
                                 {% endif %}
                             </div>
@@ -210,7 +211,7 @@
 {% block extra_js %}
 <script>
     $(document).ready(function() {
-        const miembroSelect = $('#{{ form.miembro.id_for_label }}');
+        const miembroAutocomplete = $('#id_miembro_autocomplete');
         const membresiaSelect = $('#{{ form.membresia.id_for_label }}');
         const montoInput = $('#{{ form.monto.id_for_label }}');
         const metodoPagoSelect = $('#{{ form.metodo_pago.id_for_label }}');
@@ -230,51 +231,46 @@
         const historialPagos = $('#historialPagos');
         const historialPagosBody = $('#historialPagosBody');
         
-        // Función para cargar las membresías de un miembro
-        function cargarMembresias(miembroId) {
-            if (!miembroId) {
-                membresiaSelect.empty().append('<option value="">---------</option>');
-                membresiaSelect.prop('disabled', true);
-                membresiaHelp.removeClass('d-none');
+        // Autocompletado de miembro
+        miembroAutocomplete.on('input', function() {
+            var query = $(this).val();
+            if (query.length < 2) {
+                $('#miembro-autocomplete-list').hide();
                 return;
             }
-            
-            membresiaSelect.prop('disabled', true);
-            membresiaSelect.empty().append('<option value="">Cargando...</option>');
-            
             $.ajax({
-                url: `/app_gimnasio/api/miembro/${miembroId}/membresias/`,
+                url: '/app_gimnasio/api/miembros_autocomplete/?q=' + encodeURIComponent(query),
                 method: 'GET',
                 success: function(data) {
-                    membresiaSelect.empty().append('<option value="">Seleccione una membresía</option>');
-                    
+                    var list = $('#miembro-autocomplete-list');
+                    list.empty();
                     if (data.length === 0) {
-                        membresiaSelect.append('<option value="" disabled>No hay membresías disponibles</option>');
+                        list.append('<div class="autocomplete-item px-2 py-1 text-muted">Sin resultados</div>');
                     } else {
-                        data.forEach(function(membresia) {
-                            const option = $('<option></option>')
-                                .val(membresia.id)
-                                .text(`${membresia.tipo_membresia.nombre} (${membresia.fecha_inicio} - ${membresia.fecha_vencimiento})`);
-                            
-                            membresiaSelect.append(option);
+                        data.forEach(function(item) {
+                            var div = $('<div class="autocomplete-item px-2 py-1 cursor-pointer"></div>');
+                            div.text(item.nombre_completo);
+                            div.data('id', item.id);
+                            div.on('mousedown', function() {
+                                miembroAutocomplete.val(item.nombre_completo);
+                                // Aquí puedes guardar el id en un campo oculto o actualizar el formulario
+                                // $('#id_miembro').val(item.id);
+                                list.hide();
+                            });
+                            list.append(div);
                         });
                     }
-                    
-                    membresiaSelect.prop('disabled', false);
-                    membresiaHelp.addClass('d-none');
-                    
-                    // Si hay un valor preseleccionado, seleccionarlo
-                    {% if form.membresia.value %}
-                    membresiaSelect.val('{{ form.membresia.value }}');
-                    cargarInfoMembresia('{{ form.membresia.value }}');
-                    {% endif %}
-                },
-                error: function() {
-                    membresiaSelect.empty().append('<option value="">Error al cargar membresías</option>');
-                    membresiaSelect.prop('disabled', true);
+                    list.show();
                 }
             });
-        }
+        });
+        
+        // Ocultar lista si se hace clic fuera
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('#id_miembro_autocomplete, #miembro-autocomplete-list').length) {
+                $('#miembro-autocomplete-list').hide();
+            }
+        });
         
         // Función para cargar información de una membresía
         function cargarInfoMembresia(membresiaId) {
@@ -393,13 +389,6 @@
         }
         
         // Eventos
-        miembroSelect.on('change', function() {
-            const miembroId = $(this).val();
-            cargarMembresias(miembroId);
-            membresiaInfo.addClass('d-none');
-            historialPagos.addClass('d-none');
-        });
-        
         membresiaSelect.on('change', function() {
             const membresiaId = $(this).val();
             cargarInfoMembresia(membresiaId);
@@ -413,7 +402,7 @@
             cargarInfoMembresia('{{ form.instance.membresia.id }}');
         {% elif form.miembro.value %}
             // Si hay un miembro preseleccionado, cargar sus membresías
-            cargarMembresias('{{ form.miembro.value }}');
+            // cargarMembresias('{{ form.miembro.value }}');
         {% else %}
             // Deshabilitar el select de membresías hasta que se seleccione un miembro
             membresiaSelect.prop('disabled', true);

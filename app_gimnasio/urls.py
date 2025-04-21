@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 from .views_membresia import membresia_renovar
 from .views_pago import pago_list, pago_detail, pago_create, pago_update, pago_delete, generar_recibo, reporte_pagos
-from .views_api import miembro_membresias, membresia_detalle, membresia_pagos, metodo_pago_detalle
+from .views_api import miembro_membresias, membresia_detalle, membresia_pagos, metodo_pago_detalle, miembros_autocomplete
 from .views_reporte import reporte_miembros_activos_inactivos, exportar_miembros_excel, exportar_miembros_pdf
 
 app_name = 'app_gimnasio'
@@ -43,6 +43,7 @@ urlpatterns = [
     path('api/membresia/<int:membresia_id>/', membresia_detalle, name='api_membresia_detalle'),
     path('api/membresia/<int:membresia_id>/pagos/', membresia_pagos, name='api_membresia_pagos'),
     path('api/metodo_pago/<int:metodo_id>/', metodo_pago_detalle, name='api_metodo_pago_detalle'),
+    path('api/miembros_autocomplete/', miembros_autocomplete, name='api_miembros_autocomplete'),
     
     # Entrenadores
     path('entrenadores/', views.entrenador_list, name='entrenador_list'),
@@ -73,7 +74,7 @@ urlpatterns = [
     
     # Objetivos
     path('objetivos/', views.objetivo_list, name='objetivo_list'),
-    path('objetivos/nuevo/', views.objetivo_create, name='objetivo_create'),
+    # Ruta deshabilitada: path('objetivos/nuevo/', views.objetivo_create, name='objetivo_create'),
     path('objetivos/<int:pk>/editar/', views.objetivo_update, name='objetivo_update'),
     path('objetivos/<int:pk>/eliminar/', views.objetivo_delete, name='objetivo_delete'),
     

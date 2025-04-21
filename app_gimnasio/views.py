@@ -356,12 +356,6 @@ def membresia_delete(request, pk):
     return membresia_delete_view(request, pk)
 
 @login_required
-def pago_detail(request, pk):
-    # Placeholder
-    return render(request, 'app_gimnasio/placeholder.html', {'mensaje': 'Detalle de Pago - Funcionalidad en desarrollo'})
-
-@login_required
-@login_required
 def entrenador_detail(request, pk):
     # Placeholder
     return render(request, 'app_gimnasio/placeholder.html', {'mensaje': 'Detalle de Entrenador - Funcionalidad en desarrollo'})
@@ -416,23 +410,11 @@ def horario_clase_delete(request, pk):
     # Placeholder
     return render(request, 'app_gimnasio/placeholder.html', {'mensaje': 'Eliminar Horario de Clase - Funcionalidad en desarrollo'})
 
-# --- OBJETIVOS (CRUD real, no placeholder) ---
+# --- OBJETIVOS (CRUD real, sin crear) ---
 from .forms import ObjetivoForm
 from .models import Objetivo
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, get_object_or_404, redirect
-
-@login_required
-@permission_required('app_gimnasio.add_objetivo', raise_exception=True)
-def objetivo_create(request):
-    if request.method == 'POST':
-        form = ObjetivoForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('app_gimnasio:objetivo_list')
-    else:
-        form = ObjetivoForm()
-    return render(request, 'app_gimnasio/objetivo_form.html', {'form': form, 'title': 'Nuevo Objetivo'})
 
 @login_required
 @permission_required('app_gimnasio.change_objetivo', raise_exception=True)

@@ -110,6 +110,20 @@ def metodo_pago_detalle(request, metodo_id):
     return JsonResponse(data)
 
 @login_required
+def miembros_autocomplete(request):
+    """Devuelve una lista de miembros que coincidan con el query para autocompletado."""
+    q = request.GET.get('q', '').strip()
+    results = []
+    if q:
+        miembros = Miembro.objects.filter(nombre__icontains=q)[:10]
+        for m in miembros:
+            results.append({
+                'id': m.id,
+                'nombre_completo': f"{m.nombre} {m.apellido}"
+            })
+    return JsonResponse(results, safe=False)
+
+@login_required
 @permission_required('app_gimnasio.view_objetivo', raise_exception=True)
 def objetivo_list(request):
     objetivos = Objetivo.objects.all().order_by('nombre')

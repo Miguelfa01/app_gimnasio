@@ -60,7 +60,11 @@
                                 {% if pago.referencia_pago %}
                                 <p><strong>Referencia/Nº Transacción:</strong> {{ pago.referencia_pago }}</p>
                                 {% endif %}
-                                <p><strong>Registrado por:</strong> {{ pago.registrado_por.get_full_name|default:pago.registrado_por.username }}</p>
+                                {% if pago.registrado_por %}
+                                    <p><strong>Registrado por:</strong> {{ pago.registrado_por.get_full_name|default:pago.registrado_por.username }}</p>
+                                {% else %}
+                                    <p><strong>Registrado por:</strong> <span class="text-muted">No registrado</span></p>
+                                {% endif %}
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -136,15 +140,15 @@
                     <div class="mb-4">
                         <div class="text-center">
                             <h4 class="small font-weight-bold">Progreso de Pago <span class="float-right">
-                                {% if total_pagado >= pago.membresia.precio_pagado %}
+                                {% if progreso_pago >= 100 %}
                                     100%
                                 {% else %}
-                                    {{ total_pagado|floatformat:0 }}%
+                                    {{ progreso_pago|floatformat:0 }}%
                                 {% endif %}
                             </span></h4>
                             <div class="progress mb-4">
-                                <div class="progress-bar bg-success" role="progressbar" style="width: {% if total_pagado >= pago.membresia.precio_pagado %}100{% else %}{{ total_pagado|floatformat:0 }}{% endif %}%"
-                                    aria-valuenow="{% if total_pagado >= pago.membresia.precio_pagado %}100{% else %}{{ total_pagado|floatformat:0 }}{% endif %}" aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {% if progreso_pago >= 100 %}100{% else %}{{ progreso_pago|floatformat:0 }}{% endif %}%"
+                                    aria-valuenow="{% if progreso_pago >= 100 %}100{% else %}{{ progreso_pago|floatformat:0 }}{% endif %}" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                         </div>
                     </div>
